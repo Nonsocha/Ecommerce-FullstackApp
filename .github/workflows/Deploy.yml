@@ -18,12 +18,15 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install frontend dependencies
-        working-directory: frontend-webapp
+        working-directory: frontend
         run: npm install
       
       - name: Build frontend
-        working-directory: frontend-webapp
+        working-directory: frontend
         run: npm run build  # Adjust if your build script is named differently
+
+      - name: Build Docker Image for Frontend
+        run: docker build -t my-frontend-image ./frontend  # Replace with your desired image name
 
   build-backend:
     runs-on: ubuntu-latest
@@ -44,18 +47,6 @@ jobs:
       - name: Run backend tests
         working-directory: backend
         run: npm test  # Optional: Run tests before deploying
-        jobs:
-  build-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker Image
-        run: docker build -t api-image ./frontend
 
-  build-backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Build Docker Image
-        run: docker build -t webapp-image ./backend
-      
+      - name: Build Docker Image for Backend
+        run: docker build -t my-backend-image ./backend  # Replace with your desired image name
