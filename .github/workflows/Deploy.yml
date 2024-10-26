@@ -6,7 +6,7 @@ on:
       - main  # Adjust to your main branch name
 
 jobs:
-  build-frontend:
+  build-frontend-webapp:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,15 +18,15 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install frontend dependencies
-        working-directory: frontend
+        working-directory: frontend-webapp
         run: npm install
       
       - name: Build frontend
-        working-directory: frontend
+        working-directory: frontend-webapp
         run: npm run build  # Adjust if your build script is named differently
 
       - name: Build Docker Image for Frontend
-        run: docker build -t my-frontend-image ./frontend  # Replace with your desired image name
+        run: docker build -t my-frontend-image ./frontend-webapp  # Replace with your desired image name
 
   build-backend:
     runs-on: ubuntu-latest
