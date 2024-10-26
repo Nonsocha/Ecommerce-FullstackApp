@@ -24,3 +24,24 @@ jobs:
       - name: Build frontend
         working-directory: frontend-webapp
         run: npm run build  # Adjust if your build script is named differently
+
+    build-backend:
+       runs-on: ubuntu-latest
+       needs: build-frontend
+       steps:
+       - name: Checkout code
+         uses: actions/checkout@v2
+      
+       - name: Set up Node.js
+         uses: actions/setup-node@v2
+         with:
+          node-version: '14'  # Use the Node.js version you need
+      
+       - name: Install backend dependencies
+         working-directory: backend-api
+         run: npm install
+      
+       - name: Run backend tests
+         working-directory: backend-api
+         run: npm test  # Optional: Run tests before deploying
+ 
