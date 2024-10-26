@@ -38,10 +38,10 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install backend dependencies
-        working-directory: backend-api
+        working-directory: backend
         run: npm install
       
       - name: Run backend tests
-        working-directory: backend-api
+        working-directory: backend
         run: npm test  # Optional: Run tests before deploying
       
