@@ -33,4 +33,10 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin 209479266629.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_frontend_repo
+          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin 209479266629.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo
+
+      - name: Tag Docker Image
+        run: docker tag my-backend-image:latest your-aws-account-id.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my-backend-repo:latest
+
+      - name: Push Docker Image to Amazon ECR
+        run: docker push your-aws-account-id.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my-backend-repo:latest
