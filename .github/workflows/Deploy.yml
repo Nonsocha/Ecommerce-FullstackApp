@@ -50,20 +50,18 @@ jobs:
       - name: Build Docker Image for Backend
         run: docker build -t my-backend-image ./backend  # Replace with your desired image name
       
-      - name: Configure AWS Credentials
+       - name: Configure AWS Credentials with Dummy Values
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-          aws_secert_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: us-east-2
+          aws-access-key-id: "dummy-access-key-id"
+          aws-secret-access-key: "dummy-secret-access-key"
+          aws-region: us-east-2  # Replace this with your actual AWS region
 
-      - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
-
-      - name: Build and Tag Docker Image for Frontend
+      - name: Log in to Amazon ECR
         run: |
-          docker build -t my-frontend-image:latest ./frontend-webapp
-          docker tag my-frontend-image:latest your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.us-east-2.amazonaws.com
 
-      - name: Push Docker Image to Amazon ECR
-        run: docker push your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
+      - name: Build and Push Docker Image
+       run: |
+          docker build -t <your-account-id>.dkr.ecr.us-east-2.amazonaws.com/your-repo-name:latest .
+          docker push <your-account-id>.dkr.ecr.us-east-2.amazonaws.com/your-repo-name:latest
