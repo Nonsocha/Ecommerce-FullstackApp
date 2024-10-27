@@ -72,8 +72,8 @@ jobs:
       - name: Build and Tag Docker Image for Frontend
         run: |
           docker build -t my-frontend-image:latest ./frontend-webapp
-          docker tag my-frontend-image:latest your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
+          docker tag my-frontend-image:latest your-aws-account-id.dkr.ecr.us-east-2.amazonaws.com/my-frontend-image:latest
 
       - name: Push Docker Image to Amazon ECR
-        run: docker push your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
+        run: docker push your-aws-account-id.dkr.ecr.us-east-2.amazonaws.com/my-frontend-image:latest
 
