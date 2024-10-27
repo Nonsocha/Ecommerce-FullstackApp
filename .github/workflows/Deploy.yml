@@ -22,9 +22,7 @@ jobs:
         working-directory: backend
         run: npm test  # Optional: Run tests before deploying
  
-      - name: Build Docker Image for Backend
-        run: docker build -t my-backend-image ./backend  # Replace with your desired image name
- 
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -35,6 +33,9 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin 209479266629.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo
 
+      - name: Build Docker Image for Backend
+        run: docker build -t my-backend-image ./backend  # Replace with your desired image name
+   
       - name: Tag Docker Image
         run: docker tag my-backend-image:latest 209479266629.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my-backend-repo:latest
 
