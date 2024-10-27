@@ -18,15 +18,15 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install frontend dependencies
-        working-directory: frontend-webapp  # Ensure this directory exists
+        working-directory: ecommerce-frontend  # Ensure this directory exists
         run: npm install
       
       - name: Build frontend
-        working-directory: frontend-webapp
+        working-directory: ecommerce-frontend
         run: npm run build  # Adjust if your build script is named differently
 
       - name: Build Docker Image for Frontend
-        run: docker build -t my-frontend-image ./frontend-webapp  # Replace with your desired image name
+        run: docker build -t my-frontend-image ./ecommerce-frontend  # Replace with your desired image name
 
   build-backend:
     runs-on: ubuntu-latest 
@@ -40,21 +40,21 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install backend dependencies
-        working-directory: backend  # Ensure this directory exists
+        working-directory: ecommerce-api  # Ensure this directory exists
         run: npm install
       
       - name: Run backend tests
-        working-directory: backend
+        working-directory: ecommerce-api
         run: npm test  # Optional: Run tests before deploying
 
       - name: Build Docker Image for Backend
-        run: docker build -t my-backend-image ./backend  # Replace with your desired image name
-      
-       - name: Configure AWS Credentials with Dummy Values
+        run: docker build -t my-backend-image ./ecommerce-api  # Replace with your desired image name
+
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          aws-access-key-id: "dummy-access-key-id"
-          aws-secret-access-key: "dummy-secret-access-key"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2  # Replace this with your actual AWS region
 
       - name: Log in to Amazon ECR
@@ -62,6 +62,6 @@ jobs:
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin <your-account-id>.dkr.ecr.us-east-2.amazonaws.com
 
       - name: Build and Push Docker Image
-       run: |
+        run: |
           docker build -t <your-account-id>.dkr.ecr.us-east-2.amazonaws.com/your-repo-name:latest .
           docker push <your-account-id>.dkr.ecr.us-east-2.amazonaws.com/your-repo-name:latest
