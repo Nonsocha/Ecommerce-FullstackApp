@@ -32,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '14'  # Use the Node.js version you need
       
@@ -51,14 +51,14 @@ jobs:
         run: docker build -t my-backend-image ./backend  # Replace with your desired image name
       
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS }}
-          aws-region: us-east-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
+        run: aws ecr get-login-password ${{ secrets.AWS_REGION }}  | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Build and Tag Docker Image for Frontend
         run: |
@@ -66,4 +66,4 @@ jobs:
           docker tag my-frontend-image:latest your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
 
       - name: Push Docker Image to Amazon ECR
-        run: docker push your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
+        run: docker push your-aws-account-id.dkr.ecr.us-east-1.amazonaws
