@@ -48,4 +48,4 @@ jobs:
         run: npm test  # Optional: Run tests before deploying
 
       - name: Build Docker Image for Backend
-        run: docker build -t my-backend-image ./backend-api  # Replace with your desired image name
+        run: docker build -t my-backend-image ./backend  # Replace with your desired image name
