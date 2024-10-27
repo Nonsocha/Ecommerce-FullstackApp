@@ -50,3 +50,21 @@ jobs:
 
       - name: Build Docker Image for Backend
         run: docker build -t my-backend-image ./backend  # Replace with your desired image name
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS }}
+          aws-region: us-east-2
+
+      - name: Login to Amazon ECR
+        run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build and Tag Docker Image for Frontend
+        run: |
+          docker build -t my-frontend-image:latest ./frontend-webapp
+          docker tag my-frontend-image:latest your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
+
+      - name: Push Docker Image to Amazon ECR
+        run: docker push your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
