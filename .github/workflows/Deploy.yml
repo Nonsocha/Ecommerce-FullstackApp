@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '14'  # Use the Node.js version you need
       
@@ -32,10 +32,10 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '14'  # Use the Node.js version you need
       
@@ -51,11 +51,11 @@ jobs:
         run: docker build -t my-backend-image ./backend  # Replace with your desired image name
       
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS }}
-          AWS_REGION: us-east-2
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secert_access_key: ${{ secrets.AWS_SECRET_ACCESS }}
+          aws_region: us-east-2
 
       - name: Login to Amazon ECR
         run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
