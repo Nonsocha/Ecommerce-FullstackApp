@@ -1,37 +1,36 @@
-name: Deploy Frontend-api and Backend-webapp
-
+name: Deploy Frontend-API and Backend-WebApp
+ 
 on:
   push:
     branches:
-      - main  # Adjust to your main branch name
+      - main  # Adjust to your main branch name if needed
+ 
+jobs:
   build-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '14'  # Use the Node.js version you need
-      
       - name: Install backend dependencies
         working-directory: backend  # Ensure this directory exists
         run: npm install
-      
       - name: Run backend tests
         working-directory: backend
         run: npm test  # Optional: Run tests before deploying
-
+ 
       - name: Build Docker Image for Backend
         run: docker build -t my-backend-image ./backend  # Replace with your desired image name
-             
+ 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password ${{ secrets.AWS_REGION }}  | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin 209479266629.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
