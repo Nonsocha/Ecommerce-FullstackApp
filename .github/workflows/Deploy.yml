@@ -1,4 +1,4 @@
-name: Deploy Frontend-webapp and Backend
+name: Deploy Frontend-api and Backend-webapp
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main  # Adjust to your main branch name
 
 jobs:
-  build-frontend-webapp:
+  build-frontend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,7 +18,7 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install frontend dependencies
-        working-directory: frontend-webapp
+        working-directory: frontend-webapp  # Ensure this directory exists
         run: npm install
       
       - name: Build frontend
@@ -29,8 +29,7 @@ jobs:
         run: docker build -t my-frontend-image ./frontend-webapp  # Replace with your desired image name
 
   build-backend:
-    runs-on: ubuntu-latest
-    needs: build-frontend  # This job depends on the frontend build
+    runs-on: ubuntu-latest 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -41,7 +40,7 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install backend dependencies
-        working-directory: backend
+        working-directory: backend  # Ensure this directory exists
         run: npm install
       
       - name: Run backend tests
