@@ -1,4 +1,4 @@
-name: Deploy Frontend-api and Backend-webapp
+name: Deploy Frontend-weapp and Backend
 
 on:
   push:
@@ -18,11 +18,11 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install frontend dependencies
-        working-directory: ecommerce-frontend  # Ensure this directory exists
+        working-directory: frontend-webapp  # Ensure this directory exists
         run: npm install
       
       - name: Build frontend
-        working-directory: ecommerce-frontend
+        working-directory: frontend-webapp
         run: npm run build  # Adjust if your build script is named differently
 
       - name: Build Docker Image for Frontend
@@ -40,11 +40,11 @@ jobs:
           node-version: '14'  # Use the Node.js version you need
       
       - name: Install backend dependencies
-        working-directory: ecommerce-api  # Ensure this directory exists
+        working-directory: backend  # Ensure this directory exists
         run: npm install
       
       - name: Run backend tests
-        working-directory: ecommerce-api
+        working-directory: backend
         run: npm test  # Optional: Run tests before deploying
 
       - name: Build Docker Image for Backend
