@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '14'  # Use the Node.js version you need
       
@@ -29,13 +29,13 @@ jobs:
         run: docker build -t my-frontend-image ./frontend-webapp  # Replace with your desired image name
 
   build-backend:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: '14'  # Use the Node.js version you need
       
@@ -49,7 +49,7 @@ jobs:
 
       - name: Build Docker Image for Backend
         run: docker build -t my-backend-image ./backend  # Replace with your desired image name
-      
+             
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -59,11 +59,3 @@ jobs:
 
       - name: Login to Amazon ECR
         run: aws ecr get-login-password ${{ secrets.AWS_REGION }}  | docker login --username AWS --password-stdin your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com
-
-      - name: Build and Tag Docker Image for Frontend
-        run: |
-          docker build -t my-frontend-image:latest ./frontend-webapp
-          docker tag my-frontend-image:latest your-aws-account-id.dkr.ecr.us-east-1.amazonaws.com/my-frontend-image:latest
-
-      - name: Push Docker Image to Amazon ECR
-        run: docker push your-aws-account-id.dkr.ecr.us-east-1.amazonaws
