@@ -45,14 +45,26 @@ jobs:
       - name: Push Docker Image to Amazon ECR
         run: docker push 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
 
+        - name: Set up SSH key
+        run: echo "${{ secrets.FULLSTACK_PEM }}" > $HOME/fullstack.pem
+        shell: bash
+      
+      - name: Set permissions for SSH key
+        run: chmod 600 $HOME/fullstack.pem
+        shell: bash
+      
       - name: Deploy to EC2
-        env:
-          ECR_REPO_URI: 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo
         run: |
-          ssh -o StrictHostKeyChecking=no -i "$HOME/Downloads/fullstack.pem" ec2-user@18.227.48.162 << 'EOF'
-            # Pull the latest image from ECR
-            aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REPO_URI
+          ssh -o StrictHostKeyChecking=no -i "$HOME/fullstack.pem" ec2-user@18.227.48.162 << 'EOF'
+            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $ECR_REPO_URI
             docker pull $ECR_REPO_URI:latest
             docker rm -f backend-container || true
             docker run -d --name backend-container -p 80:80 $ECR_REPO_URI:latest
           EOF
+        env:
+          AWS_DEFAULT_REGION: us-east-2
+          AWS_REGION: us-east-2
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_REPO_URI: 890742594051.dkr.ecr.us-east-2.amazonaws.com/my_backend_repo
+      
