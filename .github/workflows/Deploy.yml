@@ -45,7 +45,7 @@ jobs:
       - name: Push Docker Image to Amazon ECR
         run: docker push 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
 
-        - name: Set up SSH key
+      - name: Set up SSH key
         run: echo "${{ secrets.FULLSTACK_PEM }}" > $HOME/fullstack.pem
         shell: bash
       
@@ -67,4 +67,3 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           ECR_REPO_URI: 890742594051.dkr.ecr.us-east-2.amazonaws.com/my_backend_repo
-      
