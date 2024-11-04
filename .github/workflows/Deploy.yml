@@ -61,6 +61,7 @@ jobs:
             docker rm -f backend-container || true
             docker run -d --name backend-container -p 80:80 $ECR_REPO_URI:latest
           EOF
+        shell: bash
         env:
           AWS_DEFAULT_REGION: us-east-2
           AWS_REGION: us-east-2
