@@ -1,0 +1,58 @@
+name: Deploy Frontend-API and Backend-WebApp
+
+on:
+  push:
+    branches:
+      - main  # Adjust to your main branch name if needed
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'  # Use the Node.js version you need
+
+      - name: Install backend dependencies
+        working-directory: backend  # Ensure this directory exists
+        run: npm install
+
+      - name: Run backend tests
+        working-directory: backend
+        run: npm test  # Optional: Run tests before deploying
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo
+
+      - name: Build Docker Image for Backend
+        run: docker build -t my-backend-image ./backend  # Replace with your desired image name
+
+      - name: Tag Docker Image
+        run: docker tag my-backend-image:latest 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+
+      - name: Push Docker Image to Amazon ECR
+        run: docker push 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+
+      - name: Deploy to EC2
+        env:
+          ECR_REPO_URI: 890742594051.dkr.ecr.${{ vars.AWS_REGION }}.amazonaws.com/my_backend_repo
+        run: |
+          ssh -o StrictHostKeyChecking=no -i "/tmp/ec2_key.pem" ec2-user@${{ vars.EC2_PUBLIC_IP }} << 'EOF'
+            # Pull the latest image from ECR
+            aws ecr get-login-password --region ${{ vars.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REPO_URI
+            docker pull $ECR_REPO_URI:latest
+            docker rm -f backend-container || true
+            docker run -d --name backend-container -p 80:80 $ECR_REPO_URI:latest
+          EOF
