@@ -25,6 +25,14 @@ jobs:
         working-directory: backend
         run: npm test  # Optional: Run tests before deploying
 
+      - name: Install frontend-webapp dependencies
+        working-directory: frontend-webapp  # Ensure this directory exists
+        run: npm install
+
+      - name: Run frontend Build
+        working-directory: frontend-webapp
+        run: npm build  # 
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
