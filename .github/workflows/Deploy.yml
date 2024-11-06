@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  backend-api-tests:
+  backend-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -17,19 +17,19 @@ jobs:
           node-version: '14'
       - name: Install dependencies
         run: npm install
-        working-directory: ./backend-api
+        working-directory: ./backend
       - name: Run Test
         run: npm test
-        working-directory: ./backend-api 
+        working-directory: ./backend 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
       - name: Build Docker Image for Backend
         run: |
-          docker build -t your-ecr-repo-name/backend-api:latest ./backend-api
+          docker build -t your-ecr-repo-name/backend:latest ./backend
       - name: Tag and Push Docker Image for Backend
         run: |
-          docker tag your-ecr-repo-name/backend-api:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend-api:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend-api:latest
+          docker tag your-ecr-repo-name/backend-api:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend:latest
 
   frontend-webapp-tests:
     runs-on: ubuntu-latest
