@@ -30,7 +30,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }} # replace with your region
+          aws-region: ${{ secrets.AWS_REGION }}
   
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
@@ -44,7 +44,7 @@ jobs:
 
       - name: Push Docker Image to Amazon ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
- 
+
   frontend-webapp-tests:
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +69,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }} # replace with your region
+          aws-region: ${{ secrets.AWS_REGION }}
      
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
@@ -83,4 +83,30 @@ jobs:
 
       - name: Push Docker Image to Amazon ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
- 
+
+  deploy-to-ec2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Decode SSH Key
+        run: echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
+        
+      - name: Set SSH Key Permissions
+        run: chmod 600 ~/.ssh/id_rsa
+
+      - name: Add EC2 Host to Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            # Deploy commands here, for example:
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
+            # Add your deployment commands here
+            # Example: Restart a service or pull new Docker images
+          EOF
