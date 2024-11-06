@@ -37,12 +37,12 @@ jobs:
         
       - name: Build Docker Image for Backend
         run: |
-          docker build -t your-ecr-repo-name/backend:latest ./backend
+          docker build -t my_backend_repo/backend:latest ./backend
           
       - name: Tag and Push Docker Image for Backend
         run: |
-          docker tag your-ecr-repo-name/backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend:latest
+          docker tag my_backend_repo/backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo/backend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo/backend:latest
 
   frontend-webapp-tests:
     runs-on: ubuntu-latest
@@ -57,20 +57,20 @@ jobs:
           
       - name: Install dependencies
         run: npm install
-        working-directory: ./frontend-webapp/webapp
+        working-directory: ./frontend-webapp
         
       - name: Run build
         run: npm run build
-        working-directory: ./frontend-webapp/webapp
+        working-directory: ./frontend-webapp
         
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
         
       - name: Build Docker Image for Frontend
         run: |
-          docker build -t your-ecr-repo-name/frontend-webapp:latest ./frontend-webapp/webapp
+          docker build -t my-frontend-repo/frontend-webapp:latest ./frontend-webapp
           
       - name: Tag and Push Docker Image for Frontend
         run: |
-          docker tag your-ecr-repo-name/frontend-webapp:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/frontend-webapp:latest
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/frontend-webapp:latest
+          docker tag my-front-end-repo/frontend-webapp:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo/frontend-webapp:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-front-end-repo/frontend-webapp:latest
