@@ -35,4 +35,42 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
         
-      - name: Build
+      - name: Build Docker Image for Backend
+        run: |
+          docker build -t your-ecr-repo-name/backend:latest ./backend
+          
+      - name: Tag and Push Docker Image for Backend
+        run: |
+          docker tag your-ecr-repo-name/backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/backend:latest
+
+  frontend-webapp-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '14'
+          
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./frontend-webapp/webapp
+        
+      - name: Run build
+        run: npm run build
+        working-directory: ./frontend-webapp/webapp
+        
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        
+      - name: Build Docker Image for Frontend
+        run: |
+          docker build -t your-ecr-repo-name/frontend-webapp:latest ./frontend-webapp/webapp
+          
+      - name: Tag and Push Docker Image for Frontend
+        run: |
+          docker tag your-ecr-repo-name/frontend-webapp:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/frontend-webapp:latest
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/your-ecr-repo-name/frontend-webapp:latest
