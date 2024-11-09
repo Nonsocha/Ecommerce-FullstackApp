@@ -87,13 +87,17 @@ jobs:
   deploy-to-ec2:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+     - name: Checkout code
         uses: actions/checkout@v3
-        
-       - name: Decode SSH Key
+
+     - name: show runner working directory
+         run: |
+          ls -al   
+          pwd
+         
+     - name: Decode SSH Key
          run: |
           mkdir -p ~/.ssh   # Ensure .ssh directory exists
-          
           echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
 
       - name: Set SSH Key Permissions
