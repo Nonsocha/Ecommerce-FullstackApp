@@ -87,29 +87,26 @@ jobs:
   deploy-to-ec2:
     runs-on: ubuntu-latest
     steps:
-     - name: Checkout code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-     - name: show runner working directory
-         run: |
+      - name: Show runner working directory
+        run: |
           ls -al   
           pwd
          
-     - name: Decode SSH Key
-         run: |
-          mkdir -p ~/.ssh   # Ensure .ssh directory exists
+      - name: Decode SSH Key
+        run: |
+          mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
 
       - name: Set SSH Key Permissions
-        run: chmod 600 ~/.ssh/id_rsa 
-
+        run: chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-            # Deploy commands here, for example:
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
             # Add your deployment commands here
-            # Example: Restart a service or pull new Docker images
           EOF
