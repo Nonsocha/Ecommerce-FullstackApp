@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3 
         with:
           node-version: '14'
           
@@ -110,3 +110,4 @@ jobs:
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
             # Add your deployment commands here
           EOF
+////
