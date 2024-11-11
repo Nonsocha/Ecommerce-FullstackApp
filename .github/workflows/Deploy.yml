@@ -128,7 +128,7 @@ jobs:
 
       - name: Deploy to EC2
         run: |
-          ssh -t -o StrictHostKeyChecking=no -i fullstack.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          ssh -t -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
             # Log in to Amazon ECR
             aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
             
@@ -140,5 +140,5 @@ jobs:
             docker rm frontend || true
 
             # Run the containers
-            docker run -d --name frontend -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+            docker run -d --name frontend -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_frontend_repo:latest
           EOF
