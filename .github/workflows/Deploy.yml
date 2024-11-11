@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v3 
         with:
           node-version: '14'
           
@@ -97,22 +97,34 @@ jobs:
          
       - name: Decode SSH Key
         run: |
-          mkdir -p ~/.ssh   # Ensure .ssh directory exists
+          mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
 
       - name: Set SSH Key Permissions
-        run: chmod 600 ~/.ssh/id_rsa 
+        run: chmod 600 ~/.ssh/id_rsa
 
-      - name: Deploy to EC2
-        run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
-            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
-            # Restart Docker containers if needed
-            docker stop backend-container || true
-            docker rm backend-container || true
-            docker run -d --name backend-container -p 4000:4000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
-            docker stop frontend-container || true
-            docker rm frontend-container || true
-            docker run -d --name frontend-container -p 3000:3000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
-          EOF
+deploy-to-ec2:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-webapp-tests]  # Ensure deployment only runs after tests are completed
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set Environment
+        run: echo "${{ secrets.EC2_SSH_KEY }}" >> key.pem
+
+
+        deploy-to-ec2:
+          runs-on: ubuntu-latest
+          needs: [backend-tests, frontend-webapp-tests]  # Ensure deployment only runs after tests are completed
+          steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+            - name: Set Environment
+              run: echo "${{ secrets.EC2_SSH_KEY }}" >> key.pem
+      
+            - name: Deploy to EC2
+              run: |
+                chmod 400 key.pem
+                ssh -o StrictHostKeyChecking=no -T -i key.pem -t ubuntu@${{ secrets.EC2_HOST }}
+                docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+                docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latestrepo:latest 
