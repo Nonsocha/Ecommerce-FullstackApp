@@ -1,101 +1,101 @@
 name: CI/CD Pipelines
- 
+
 on:
   push:
     branches:
       - main
- 
+
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
- 
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '14'
- 
+
       - name: Install dependencies
         run: npm install
         working-directory: ./backend
- 
+
       - name: Run Test
         run: npm test
         working-directory: ./backend
- 
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
- 
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
- 
+
       - name: Build Docker Image for Backend
         run: docker build -t my_backend_repo/backend:latest ./backend
- 
+
       - name: Tag Docker Image
         run: docker tag my_backend_repo/backend:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
- 
+
       - name: Push Docker Image to Amazon ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
- 
+
   frontend-webapp-tests:
     runs-on: ubuntu-latest
-    needs: backend-tests 
+    needs: backend-tests
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
- 
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '14'
- 
+
       - name: Install dependencies
         run: npm install
         working-directory: ./frontend-webapp
- 
+
       - name: Run build
         run: npm run build
         working-directory: ./frontend-webapp
- 
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
- 
+
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
- 
+
       - name: Build Docker Image for Frontend
         run: docker build -t my-frontend-repo/frontend-webapp:latest ./frontend-webapp
- 
+
       - name: Tag Docker Image
         run: docker tag my-frontend-repo/frontend-webapp:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
- 
+
       - name: Push Docker Image to Amazon ECR
         run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
- 
+
   deploy-backend:
     runs-on: ubuntu-latest
     needs: [backend-tests, frontend-webapp-tests]  # Ensure deployment only runs after tests are completed
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
- 
+
       - name: Set up SSH key
         run: echo "${{ secrets.EC2_SSH_KEY }}" >> key.pem
- 
+
       - name: Set key permissions
         run: chmod 400 key.pem
- 
+
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
@@ -108,26 +108,24 @@ jobs:
             # Stop existing containers if running
             docker stop backend || true
             docker rm backend || true
- 
-            
+
             # Run the containers
             docker run -d --name backend -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
           EOF
- 
- 
+
   deploy-frontend:
     runs-on: ubuntu-latest
     needs: deploy-backend  # Ensure deployment only runs after tests are completed
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
- 
+
       - name: Set up SSH key
         run: echo "${{ secrets.EC2_SSH_KEY }}" >> key.pem
- 
+
       - name: Set key permissions
         run: chmod 400 key.pem
- 
+
       - name: Deploy to EC2
         run: |
           ssh -t -o StrictHostKeyChecking=no -i fullstack.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
@@ -140,20 +138,7 @@ jobs:
             # Stop existing containers if running
             docker stop frontend || true
             docker rm frontend || true
- 
-            
+
             # Run the containers
             docker run -d --name frontend -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
           EOF
-
-
-
-
-
-
-
-
-
-
-
-
