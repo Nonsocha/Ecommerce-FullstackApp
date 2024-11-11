@@ -142,4 +142,3 @@ jobs:
             # Run the containers
             docker run -d --name frontend -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
           EOF
-///
