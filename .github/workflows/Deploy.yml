@@ -98,7 +98,7 @@ jobs:
       - name: Decode SSH Key
         run: |
           mkdir -p ~/.ssh   # Ensure .ssh directory exists
-          echo "${{ secrets.EC2_SSH_KEY }}" | base64 --decode > ~/.ssh/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" | base64 --d > ~/.ssh/id_rsa
 
       - name: Set SSH Key Permissions
         run: chmod 600 ~/.ssh/id_rsa 
