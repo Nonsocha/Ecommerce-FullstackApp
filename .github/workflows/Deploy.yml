@@ -75,4 +75,70 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build Docker Image for Frontend
-        run: docker build -t 
+        run: docker build -t my-frontend-repo/frontend-webapp:latest ./frontend-webapp
+
+      - name: Tag Docker Image
+        run: docker tag my-frontend-repo/frontend-webapp:latest ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
+
+      - name: Push Docker Image to Amazon ECR
+        run: docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my-frontend-repo:latest
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-webapp-tests]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        run: echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+
+      - name: Set key permissions
+        run: chmod 400 key.pem
+
+      - name: Deploy to EC2
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            # Log in to Amazon ECR
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            
+            # Pull the latest images from ECR
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+            
+            # Stop existing containers if running
+            docker stop backend || true
+            docker rm backend || true
+
+            # Run the backend container
+            docker run -d --name backend -p 8080:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest
+          EOF
+
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        run: echo "${{ secrets.EC2_SSH_KEY }}" > key.pem
+
+      - name: Set key permissions
+        run: chmod 400 key.pem
+
+      - name: Deploy to EC2
+        run: |
+          ssh -t -o StrictHostKeyChecking=no -i key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            # Log in to Amazon ECR
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            
+            # Pull the latest images from ECR
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_frontend_repo:latest
+            
+            # Stop existing containers if running
+            docker stop frontend || true
+            docker rm frontend || true
+
+            # Run the frontend container on a different port
+            docker run -d --name frontend -p 8081:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_frontend_repo:latest
+          EOF
