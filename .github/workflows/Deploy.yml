@@ -142,3 +142,4 @@ jobs:
             # Run the frontend container on a different port
             docker run -d --name frontend -p 8081:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_frontend_repo:latest
           EOF
+/////
