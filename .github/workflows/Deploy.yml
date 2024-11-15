@@ -93,22 +93,19 @@ jobs:
       - name: Set up SSH key
         run: echo "${{ secrets.EC2_SSH_KEY }}" >> key.pem
 
-      # - name: Set key permissions
-      #   run: chmod 400 key.pem
-
       - name: Deploy to EC2
         run: |
-        chmod 400 key.pem 
-        ssh -o StrictHostKeyChecking=no -T -i key.pem ubuntu@${{ secrets.EC2_HOST }} "\
-        aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && \
-        aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && \
-        aws configure set region ${{ secrets.AWS_REGION }} && \
-        (aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-        docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com) && \
-        docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backendend_repo:latest && \
-        (docker stop backendend || true) && \
-        (docker rm backendend || true) && \
-        docker run -d --name backendend -p 8081:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest"
+          chmod 400 key.pem 
+          ssh -o StrictHostKeyChecking=no -T -i key.pem ubuntu@${{ secrets.EC2_HOST }} "\
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }} && \
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} && \
+          aws configure set region ${{ secrets.AWS_REGION }} && \
+          (aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
+          docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com) && \
+          docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest && \
+          (docker stop backend || true) && \
+          (docker rm backend || true) && \
+          docker run -d --name backend -p 8081:8080 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/my_backend_repo:latest"
 
   deploy-frontend:
     runs-on: ubuntu-latest
