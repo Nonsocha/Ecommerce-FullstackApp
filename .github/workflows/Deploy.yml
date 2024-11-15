@@ -100,7 +100,6 @@ jobs:
         env:
           key: "./fullstack.pem"
         run: |
-            
             chmod 400 $key
             ssh -t -o StrictHostKeyChecking=no -i $key ubuntu@3.144.252.133 
             # Log in to Amazon ECR
